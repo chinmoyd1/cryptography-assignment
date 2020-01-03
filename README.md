@@ -15,7 +15,7 @@
 >Answer:  Sender hands over secret key personally.
 
 #### 3. List all security measures required for this assignment. Hint: Key storage, Key recovery<br/> 
->Answer:<br/>Hashing(SHA256), <br/>Symmetric Key Cryptography(RSA), <br/>Asymmetric Key Cryptography(AES256), <br/>Diginal Signature
+>Answer:<br/>Hashing(SHA256), <br/>Symmetric Key Cryptography(RSA), <br/>Asymmetric Key Cryptography(AES256), <br/>Digital Signature
 
 ## Steps to run
  - clone the cryptography.assignment-1.0-standalone.jar from "/target/cryptography.assignment-1.0-standalone.jar"
