@@ -18,7 +18,6 @@
 >Answer:<br/>Hashing(SHA256), <br/>Symmetric Key Cryptography(RSA), <br/>Asymmetric Key Cryptography(AES256), <br/>Diginal Signature
 
 ## Steps to run
-```
- - clone the jar in "java /target/cryptography.assignment-1.0-standalone.jar"
- - run "java -jar cryptography.assignment-1.0-standalone.jar"
- ```
+ - clone the cryptography.assignment-1.0-standalone.jar from "/target/cryptography.assignment-1.0-standalone.jar"
+ - run "java -jar cryptography.assignment-1.0-standalone.jar" in terminal/cmd
+
