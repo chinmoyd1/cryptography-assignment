@@ -1,0 +1,58 @@
+package com.psl.cryptography.assignment.service.packet;
+
+import com.psl.cryptography.assignment.service.packet.Packet;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.crypto.NoSuchPaddingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
+import static org.junit.Assert.*;
+
+public class PacketTest {
+    
+    String finalPacket;
+    String message;
+    PrivateKey senderPrivateKey;
+    PublicKey senderPublicKey;
+    PrivateKey receiverPrivateKey;
+    PublicKey receiverPublicKey;
+
+    @Before
+    public void setUp() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        message = "Confidential Message";
+        Base64.Decoder decoder = Base64.getDecoder();
+
+        String senderPrivateKeyStr="MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCTe5XswtEIhBlDxSh0Ft2GgH0TBpQ4U1krBO3WQmpbvX7Fg5llXH5IxN9HMYcEuFIySv5UskUPh/Ej8PJfdF9NURTkHfFWdom4Z22qgYrJzsvzi4CDZYTrgyvCKJ/d+Z8ZqnZknhvooYfzWFmVNNNfnbDFznROLRflvjTMtt7/cJaS8lrRi9aOQQ6tpT3SqzHXtzk3d9wQOcoyQXiUKgmCNanPt5Q3sn70umF5uzmxagTIHxwJ90aD3YToYl3hnvoZ/bhvq2rkv1+/naleNyq6Zn04D1KxKm1Ii7iOb0Clf+6zOFBgRxth+f/h5vHm2LKD/ZfiDKHjkZ0XlXJSCkpXAgMBAAECggEAB+DpQG2j1w2ff+RPZew2x1Gj3NlUH7IsKEUqI3EG14HG/OwrzKNlR6PkvZvit5jVI0SoU4P2dn7vndjoSbsgwDOdpxYGZ3ULpGM6E4q6DE/Uy1zfb6WDtUUbmFKtP6FvI2Lc0kE0Anhml9RXbMYWqJv27oo54lc8WJSRo4H9Za3cPcGEQlOBJOs/2808emP1wOZR7s/twQvvQ0O75HIs7pY36w2PaEKgJ/BW/H2GAXogjNCLJTpQOEdiP8iafuPoNKEupdeoVmcqVMYQT3wFqRAWZZA4eN6evnbUL6A04zlOj8djZFAkFhpvIdNg3NxgPewBui0FYCun8lW2c8+WcQKBgQDQXjIo41Yp0qBYeBrqNoUpriLEqflR7JsyhZfMG27/mAuUaJylWAV5aBfFxr75pn7ig1/EQzXu0c19J+LgpxXrFQbg4nH+ZQvM3yzQA1h5Pcwc8ethfKrLsneZOcWoGkqZU3knqwKfhsYlnQvh68NwFPtrktz+HNSzJf5il9KF6QKBgQC1Mlr+Pqk/BN4BFRE3VswCGoLrEuD+VO0tDE56qZI1g0VSOGsdPwZF7bR0l2GPmWxpWOwYsFisG64CG/v+1nmfeBpb5o6ZBpMghLeNRJ3S0vp/cxC1YnxLvCIdQANs28ZG47xLdn1qp50O0x0dRYD17SAtwib4lXOQXraE+gzmPwKBgQDLF+UAIYWsQhXz5S0muHlWxNoyohHXHi2vMrNgSCUKj6JJxyVXq9G6IhF5vlwKbZQjKDXB0FjTLD+EC8qBeZpNhjMsIstFUCwORkEhhwFHO0qls87fOGopHQyhlsPnM6kehVQDrBVkdDLSGp6oV+ooZusgUQeBz4wqCZBHfP+/cQKBgQCIUByiPlOmxCubltS/0/1f67/nxukajJttE2AK6XzD40CITUdP1jUK8HucZrIPjLVBP5NGM4xR1fT/Qzw9h+4xaPIzhuxp9MdEZHONxDwS+YNX1CGSw0eM1ji31ot9Ho04kWT7RGWvke8W0v2JItuUp1JY+kHFKvGof4hB27dOkwKBgQCxHXefLR61ImPKyb36ljk3HzyT/nyDgNNyoDcXV8Y22qlJpCF8fP3whI6TsSBMwkcmkX8PAwY+fNkfwQtYePbTHcGVej31np3NXAgUbQU0hq0Ss2vREc/qr/cum0qE90v9D9fk009ASNMzpR2Wr9E2jKmZXinjDagXOC5FjQCX3Q==";
+        String senderPublicKeyStr="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk3uV7MLRCIQZQ8UodBbdhoB9EwaUOFNZKwTt1kJqW71+xYOZZVx+SMTfRzGHBLhSMkr+VLJFD4fxI/DyX3RfTVEU5B3xVnaJuGdtqoGKyc7L84uAg2WE64Mrwiif3fmfGap2ZJ4b6KGH81hZlTTTX52wxc50Ti0X5b40zLbe/3CWkvJa0YvWjkEOraU90qsx17c5N3fcEDnKMkF4lCoJgjWpz7eUN7J+9Lphebs5sWoEyB8cCfdGg92E6GJd4Z76Gf24b6tq5L9fv52pXjcqumZ9OA9SsSptSIu4jm9ApX/uszhQYEcbYfn/4ebx5tiyg/2X4gyh45GdF5VyUgpKVwIDAQAB";
+
+        senderPrivateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(decoder.decode(senderPrivateKeyStr)));
+        senderPublicKey = kf.generatePublic(new X509EncodedKeySpec(decoder.decode(senderPublicKeyStr)));
+
+        String receiverPrivateKeyStr="MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDEcnpt+zAOLx9kYMRFSfYGFq+7jSK+VaLBGg5F2FMAqT+M2WsN6ktngD3yF5Pd18KaGiXw8bXvl27GIoTe3oTGJUSG3WUg9UXqNdD/Ez5vituLSTFrIR8EAuDbfm1JMzElZIZkuIj1/zdsOQZZue1+oO/DF6OyN6QVzHzF9oeBHfSHFxT+Sw8houKpkbrl+rPE/T2qTwfF5ReGSG2zn7dveAwR4KeemuRU9XMvQ1ujk6/vbb7IpmnCorjV9pvlGyrytw35pU4zHpmiMyyBb8BCWzkQasAWt+2tXRnf6JpNB5ecsZFkjbq0BIUWOQG839BxVOqo3Gr3kaOTgQZLuQVfAgMBAAECggEAc+FfrO7GWyea6fhW7tSBJvhM82J+wy360tPO5Y6E79fmn+xExTGXB1fTsrILzIoQxhx0kxvSCaIXexMzs9ApHEUxliiVFgr5Ef5q6XxtkRilBxXG6/3esNwNzgxW5R4oeHlC+bkNOacyB0ngIB+YI+FFbZzNODywMxer5o7VQejiXd4Y+ajn0J1K+OEIxjpEmsQGnjaQOwVKDcict8ln/KeQhdiT/34VNFwSrd6nNpFSc3J8fKX2B9i0O6BayDT3oBW7//u/2fih37EqFt4J6ECXRzFeQnqMyyHJQhqGJRJCL8sc5byyWlw6uxb9S4yHcegwcou8fjjS6zKyx5d5IQKBgQD7dWv4iXZDqpWGi6nMgqpNizxDN4hKD57g6YxyyzoL+uaiwktgsUgXPbEubcMIkE9j2wm8pf++bBuGxnF2135ezja0EJjQB4m8FOcvK244msubPhbGd8+jZ/3bYVy1QwXzYomvgsMgY7KmbQC6PVD+vOYIAsejqNOih4x+9EQVrwKBgQDH/rhDdHfCViPe6dmyOa5mVoQAGGeX21WMpRLYHqnkIEQqHvoZG+OKThhTIEDYby7qJEpeTl3WBKEB8WY7A79TXsJmBGmegeBRS7gJH3dgZbp2xehRdLutBuqFqWYdUMeaxUaEjW+4ya8bYfZazfGWHEuI5Vi4VDJWp+LSU8enUQKBgQCuwlWunoJV1rkij/ALVQhc6haQtIiAyEhoEYhtw3XtG4ustBHE+pCarmJ0XQ495mV2haVHuap6whGDYmk66dtGslRsYliBw6tizrg5HRr2NgapNsaHWn8xFrXkAM94nkMFeocsNlm8Ke3gIkNuK+0djVTlXmE3Cb9D5qarGMI0uwKBgG8Wst1tLTR6SpSAitavqYrY1ZuD8s7sGznzW2NGrRG1RoerCzq1Pg/Nzz8lND/EimeuXszBdOfzTEfbAfEX5Md3ZD3sh4pvE920VHZkzxdxikB9L81HLRQwOkaiUMFJ5IW4vLHWKk+XX7ezE3de26mI8AALfNtukUOHH7u6o7TxAoGAcYUW4G6W74pD7x9RssGx6C5akinBTsv/vipxJqu/kRQZQrHjPj101+rP0E2nAN6sRqVP2WXiYwa6HP/rqtb/ByVoQuGygJFRcESWwABnQAODoFC2ogN336wzxlKDvenHBR/+vNJoby7xLQD8AgPbEVvT5BO4NiJHIggZlAzk4AA=";
+        String receiverPublicKeyStr="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxHJ6bfswDi8fZGDERUn2Bhavu40ivlWiwRoORdhTAKk/jNlrDepLZ4A98heT3dfCmhol8PG175duxiKE3t6ExiVEht1lIPVF6jXQ/xM+b4rbi0kxayEfBALg235tSTMxJWSGZLiI9f83bDkGWbntfqDvwxejsjekFcx8xfaHgR30hxcU/ksPIaLiqZG65fqzxP09qk8HxeUXhkhts5+3b3gMEeCnnprkVPVzL0Nbo5Ov722+yKZpwqK41fab5Rsq8rcN+aVOMx6ZojMsgW/AQls5EGrAFrftrV0Z3+iaTQeXnLGRZI26tASFFjkBvN/QcVTqqNxq95Gjk4EGS7kFXwIDAQAB";
+
+        receiverPrivateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(decoder.decode(receiverPrivateKeyStr)));
+        receiverPublicKey = kf.generatePublic(new X509EncodedKeySpec(decoder.decode(receiverPublicKeyStr)));
+
+        finalPacket = "AumU7nk2cB/+JIIc4c7Vn0nlrpvh0A6GS7TCRWl7KBDq+Pl8GAvjksAl8vVH6TFNOWQxLbX6KAUsKWYvx2vvVFBCusSjnCu7RMB8EFD1qJWsF3SJV9amoTwHNYiQIt1wxIySYKlkgAhwbcS5EadNGCUvckAlowCtvwh142Q2DIeP6HdKkURXyfjJYSXIXYjLbXmHr17IYIf2yzH4T8K4wK/Cq9sN/ZRNFVJu1ETBoENBOsHQpjyFOYhcoe3c8sQX0uhG6XeDpfmf5teCtbiNA+TKLZH0gvZD49ZSIZvGL4bRgTZbJaZyUq1GrqFnAzF3/mhHkO5Xnz4MGn9I6Uk9b87jR+jvuxcOUkpYdOTdmSSIgK4DftYaVzSeuKgro2qeUb1uB1K9ZJ3VsbKBtWEwDflwuxhNEnOiCfnjeBN4Iux7AggqYeqSSGSPhckC0FEaCtWxgqs37PS1VEntsZPO7gGyzsakzSTGA2tQdZs3LS0=.ku4RWhSGdh7uS3CoHeX59UrYWGTDBSPA1hMIZKznqhVF+svMnSZw0+AMlMa6JtXd/NB3hcQLx9VcHAySz2iWpRmNp22UyGKsPdXbfTVRTnPp+a3AhmXokD4ZZ0WoK/nM1BEsQPGVeurVFpzf1ZJBu+an3qTGixxWCPhdNkY7os1/FiemC7Vc9/iVTskz6GVHkbAV9EemtimV05pRv+UCb4/V6m7poASK/rT8cd4lpsCDx29fAAvDpUhQ298YInbTILERahtbboUGvqkFwqNjT6HWUEGyiFFB24HgPs1cS8+slLvoVZvL0/NFl03tgGiqYFYRiSDCupWHN70X26+WZA==";
+    }
+
+    @Test
+    public void createCryptoPacket() {
+        String packet = Packet.createCryptoPacket(message, senderPrivateKey, receiverPublicKey,0);
+        assertNotNull(packet);
+    }
+
+    @Test
+    public void decryptCryptoPacket() {
+        String decryptedMessage = Packet.decryptCryptoPacket(finalPacket, receiverPrivateKey, senderPublicKey,0);
+        assertEquals(message,decryptedMessage);
+    }
+}
